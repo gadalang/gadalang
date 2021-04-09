@@ -39,7 +39,7 @@ setup(
     entry_points={
         "console_scripts": ["gadalang=gadalang:main"],
     },
-    install_requires=["pyyaml"],
+    install_requires=["gada", "gada-pyrunner", "pygada-runtime", "gadalang-lang"],
     include_package_data=True,
     zip_safe=False,
     python_requires=">=3.7",

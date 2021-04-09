@@ -1,0 +1,4 @@
+runner: pymodule
+nodes:
+  hello:
+    entrypoint: hello

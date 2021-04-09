@@ -6,6 +6,10 @@
 Welcome to gadalang's documentation!
 ==========================================
 
+.. _gada: https://github.com/gadalang/gada
+.. _gada-pyrunner: https://github.com/gadalang/gada-pyrunner
+.. _pygada-runtime: https://github.com/gadalang/pygada-runtime
+.. _gadalang-lang: https://github.com/gadalang/gadalang-lang
 
 
 Installation
@@ -30,7 +34,10 @@ Dependencies
 ------------
 
 - Python 3.7+
-- gada
+- gada_
+- gada-pyrunner_
+- pygada-runtime_
+- gadalang-lang_
 
 
 License
@@ -46,7 +53,6 @@ Contents:
    :maxdepth: 2
 
    api
-   testutils
 
 Indices and tables
 ==================
