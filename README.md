@@ -193,10 +193,10 @@ inputs:
   optional: true
 steps:
 - node: imaging/resize
-  input: input
-  width: width
-  height: height
-  output: output
+  input: "{{ input }}"
+  width: "{{ width }}"
+  height: "{{ height }}"
+  output: "{{ output }}"
 ```
 
 The first part contains metadata:
@@ -245,10 +245,10 @@ The second part describes the nodes our gada program will run:
 ```yml
 steps:
 - node: imaging/resize
-  input: input
-  width: width
-  height: height
-  output: output
+  input: "{{ input }}"
+  width: "{{ width }}"
+  height: "{{ height }}"
+  output: "{{ output }}"
 ```
 
 Resizing an image is such a common use case, of course there is a builtin gada node for that.
