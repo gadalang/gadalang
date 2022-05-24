@@ -187,7 +187,7 @@ inputs:
   type: number
   help: new width
   optional: true
-- name: --height
+- name: height
   type: number
   help: new height
   optional: true
