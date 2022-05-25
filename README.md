@@ -715,8 +715,6 @@ def foo(*args, **kwargs):
   return {...}
 ```
 
-Under the hood this will import the module containing the node, and call the `foo` function if it exists.
-
 Scope of `cgada-runtime` package
 --------------------------------
 
