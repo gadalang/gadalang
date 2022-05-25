@@ -419,16 +419,6 @@ steps:
   b: 2
 ```
 
-Implementation:
-```python
-# __init__.py
-from pygada_runtime import node
-
-@node
-def foo() -> dict:
-  return {"a": ..., "b": ...}
-```
-
 Multiple Outputs
 ----------------
 
@@ -445,6 +435,16 @@ nodes:
     type: number
   - name: b
     type: number
+```
+
+Implementation:
+```python
+# __init__.py
+from pygada_runtime import node
+
+@node
+def foo() -> dict:
+  return {"a": ..., "b": ...}
 ```
 
 Passing Variables
