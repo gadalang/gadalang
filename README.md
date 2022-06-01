@@ -155,8 +155,9 @@ This is how you would write a gada program that outputs `hello world`:
 ```yml
 # hello_world.yml
 steps:
-- node: print
-  in: hello world
+- name: print
+  inputs:
+    in: hello world
 ```
 
 Run with:
@@ -192,11 +193,11 @@ inputs:
   help: new height
   optional: true
 steps:
-- node: imaging/resize
-  input: "{{ input }}"
-  width: "{{ width }}"
-  height: "{{ height }}"
-  output: "{{ output }}"
+- name: imaging/resize
+  inputs:
+    input: "{{ input }}"
+    width: "{{ width }}"
+    height: "{{ height }}"
 ```
 
 The first part contains metadata:
@@ -244,18 +245,18 @@ optional arguments:
 The second part describes the nodes our gada program will run:
 ```yml
 steps:
-- node: imaging/resize
-  input: "{{ input }}"
-  width: "{{ width }}"
-  height: "{{ height }}"
-  output: "{{ output }}"
+- name: imaging/resize
+  inputs:
+    input: "{{ input }}"
+    width: "{{ width }}"
+    height: "{{ height }}"
 ```
 
 Resizing an image is such a common use case, of course there is a builtin gada node for that.
 
 This node is called `resize` and resides in the `imaging` package. So specifying `imaging/resize` makes gada searches the node `resize` in the `imaging` package.
 
-The arguments `input`, `width`, `height`, `output` are passed exactly as you would do in Python with keyword arguments. So don't be surprised to see the same names on the left side and the right side.
+The arguments `input`, `width`, and `height` are passed exactly as you would do in Python with keyword arguments. So don't be surprised to see the same names on the left side and the right side.
 
 Run this program exactly like you would run a Python program:
 ```bash
@@ -305,7 +306,7 @@ Then you can write the following program:
 ```yaml
 # hello_world.yml
 steps:
-- node: helloworld/hello_world
+- name: helloworld/hello_world
 ```
 
 And run it with:
@@ -408,15 +409,17 @@ The node with the best matching signature will be chosen:
 ```yaml
 # max.yml
 steps:
-- node: mypackage/max
-  a: "abc"
-  b: "abcdef"
+- name: mypackage/max
+  inputs:
+    a: "abc"
+    b: "abcdef"
 
 # max.yml
 steps:
-- node: mypackage/max
-  a: 1
-  b: 2
+- name: mypackage/max
+  inputs:
+    a: 1
+    b: 2
 ```
 
 Multiple Outputs
@@ -452,40 +455,49 @@ Passing Variables
 
 Here comes the special `"{{ var }}"` syntax to assign or read variables.
 
-With the YAML syntax, loading the following config would give a dict containing `{"a": "hello", "b": "world"}`, and this is totally fine if we need to pass string data to a node.
+With the YAML syntax, loading the following config would give a dict containing `{"a": "hello", "b": "world"}`, and this is totally fine if we want to pass strings to a node.
 ```yaml
 # max.yml
 steps:
-- node: mypackage/max
-  a: hello
-  b: world
+- name: mypackage/max
+  inputs:
+    a: hello
+    b: world
 ```
 
 But what if we want to refer to a existing `hello` variable instead of a string ?
 
-The syntax for making reference to variables is:
+The syntax for making reference to variables global to the program is:
 
 ```yaml
 # max.yml
+inputs:
+- name: hello
+  type: str
+- name: world
+  type: str
 steps:
-- node: mypackage/max
-  a: "{{ hello }}"
-  b: "{{ world }}"
+- name: mypackage/max
+  inputs:
+    a: "{{ hello }}"
+    b: "{{ world }}"
 ```
 
 When gada sees `"{{ hello }}"`, it replaces the value by the content of the `hello` variable if defined.
 
-You can do the same for outputs:
+You can also reference outputs of nodes with an unique id:
 
 ```yaml
 # max.yml
 steps:
-- node: mypackage/max
-  a: hello
-  b: world
-  out: "{{ out }}"
-- node: print
-  in: "{{ out }}"
+- name: mypackage/max
+  id: foo
+  inputs:
+    a: hello
+    b: world
+- name: print
+  inputs:
+    in: "{{ foo.out }}"
 ```
 
 Node Reference
@@ -500,15 +512,17 @@ This is the reason why you can assign unique ids to the nodes of your program:
 ```yaml
 # max.yml
 steps:
-- node: mypackage/max
+- name: mypackage/max
   id: some_unique_id
-  a: hello
-  b: world
+  inputs:
+    a: hello
+    b: world
 # ...
 # many nodes in-between
 # ...
-- node: print
-  in: "{{ some_unique_id.out }}"
+- name: print
+  inputs:
+    in: "{{ some_unique_id.out }}"
 ```
 
 Note that you don't have to explicitely store the output of a node into a variable. Gada will remember the output of each node in the current scope and let you reference the output with `"{{ id_of_the_node.output_name }}"`.
@@ -530,15 +544,19 @@ inputs:
 - name: b
   type: number
 steps:
-- node: gt
-  a: "{{ a }}"
-  b: "{{ b }}"
-  then:
-  - node: print
-    in: a is greater than b
-  else:
-  - node: print
-    in: b is greater than a
+- name: gt
+  inputs:
+    a: "{{ a }}"
+    b: "{{ b }}"
+  outputs:
+    then:
+    - name: print
+      inputs:
+        in: a is greater than b
+    else:
+    - name: print
+      inputs:
+        in: b is greater than a
 ```
 
 This may look like a lot of work only for comparing two numbers, but remember that gada is not about coding basic functions with nodes but rather assembling multiple nodes, each performing a complicated task, together.
@@ -546,7 +564,7 @@ This may look like a lot of work only for comparing two numbers, but remember th
 At the implementation level, you may be curious to know what happens when gada encounters:
 ```yaml
   then:
-  - node: print
+  - name: print
 ```
 
 Indeed, you learned that you could pass parameters with `input: value` or capture results with `output: "{{ var }}"`. So why are we passing a node in this situation ?
@@ -592,8 +610,8 @@ An exec node is a node with an input exec pin linked to the output exec pin of a
 ```yaml
 # foo.yml
 steps:
-- node: first_node
-- node: second_node
+- name: first_node
+- name: second_node
 ```
 
 Here `second_node` is implicitly linked to `first_node` and will be executed after it.
@@ -620,10 +638,11 @@ A node marked as pure will never be executed when gada encounters it. Instead it
 ```yaml
 # foo.yml
 steps:
-- node: pi
+- name: pi
   id: pi_node
-- node: print
-  in: "{{ pi_node.out }}"
+- name: print
+  inputs:
+    in: "{{ pi_node.out }}"
 ```
 
 This means that those nodes can be placed anywhere in your program as long they are placed before any node that references them:
@@ -631,19 +650,23 @@ This means that those nodes can be placed anywhere in your program as long they 
 ```yaml
 # foo.yml
 steps:
-- node: pi
+- name: pi
   id: pi_node
 # ...
 # more nodes
 # ...
-- node: if
-  in: "{{ condition }}"
-  then:
-  - node: print
-    in: "{{ pi_node.out }}"
-  else:
-  - node: print
-    in: "{{ pi_node.out }}"
+- name: if
+  inputs:
+    in: "{{ condition }}"
+  outputs:
+    then:
+    - name: print
+      inputs:
+        in: "{{ pi_node.out }}"
+    else:
+    - name: print
+      inputs:
+        in: "{{ pi_node.out }}"
 ```
 
 Note: this design simplifies how a visual editor can generate the program by allowing it to output the pure nodes almost anywhere in the execution flow.
