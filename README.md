@@ -467,7 +467,7 @@ steps:
 
 But what if we want to refer to a existing `hello` variable instead of a string ?
 
-The syntax for making reference to variables global to the program is:
+The syntax for making reference to program inputs is:
 
 ```yaml
 # max.yml
@@ -483,9 +483,7 @@ steps:
     b: "{{ world }}"
 ```
 
-When gada sees `"{{ hello }}"`, it replaces the value by the content of the `hello` variable if defined.
-
-You can also reference outputs of nodes with an unique id:
+You can also reference outputs of other nodes with their unique id:
 
 ```yaml
 # max.yml
@@ -499,6 +497,8 @@ steps:
   inputs:
     in: "{{ foo.out }}"
 ```
+
+When gada sees `"{{ hello }}"` or `"{{ foo.out }}"`, it replaces the value by the content of the variable.
 
 Node Reference
 --------------
